@@ -1,0 +1,12 @@
+resources/MICRODADOS_ENEM_2015.*
+/target
+/classes
+/checkouts
+pom.xml
+pom.xml.asc
+*.jar
+*.class
+/.lein-*
+/.nrepl-port
+.hgignore
+.hg/
