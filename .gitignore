@@ -1,4 +1,4 @@
-resources/MICRODADOS_ENEM_2015.*
+resources/*
 /target
 /classes
 /checkouts
