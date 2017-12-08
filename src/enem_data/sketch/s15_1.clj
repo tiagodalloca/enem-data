@@ -1,10 +1,12 @@
-(ns enem-data.sketch.s15-1)
+(ns enem-data.sketch.s15-1
+  (:require [clojure.data.csv :as csv]
+            [clojure.java.io :as io]))
 
-(def data-file-name "MICRODADOS_ENEM_2015.csv")
+(def data-file-name "MICRODADOS_ENEM_2016.csv")
 
 (def data-file-path (str "resources/" data-file-name))
 
-(def labels (with-open [reader (io/reader data-file-path)]
+(def labels (with-open [reader (io/reader "resources/MICRODADOS_ENEM_2016-labels.csv")]
               (->> reader csv/read-csv (take 1) first)))
 
 (defn find-label [row label]
@@ -16,13 +18,13 @@
 
 (defn find-nth [n]
   (with-open [reader (io/reader data-file-path)]
-    (nth (drop 1 (csv/read-csv reader)) n)))
+    (nth (csv/read-csv reader) n)))
 
 (defn find-by-k-pred [k pred]
   (with-open [reader (io/reader data-file-path)]
     (let [label-i (.indexOf labels k)]
       (doall (filter #(pred (% label-i))
-                     (drop 1 (csv/read-csv reader)))))))
+                     (csv/read-csv reader))))))
 
 (defn average
   [numbers]
@@ -42,7 +44,7 @@
 ;;   (->> (find-by-k-pred "NU_INSCRICAO" (partial = "151004872116"))
 ;;        first))
 
-;; (def cotucas (find-by-k-pred "CO_ESCOLA" (partial = "35045949")))
+(def cotucas (find-by-k-pred "CO_ESCOLA" (partial = "35045949")))
 
 ;; (average (map (fn [x]
 ;;                 (some-> (x (.indexOf labels

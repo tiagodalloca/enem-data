@@ -11,12 +11,242 @@
            [org.datavec.spark.transform.misc WritablesToStringFunction]
            [java.util List]))
 
-(defn schema-builder []
+(def data-name "MICRODADOS_ENEM_2016")
+
+(def data-file-name (str data-name "-minus-first-line.csv"))
+
+(def data-file-path (str "resources/" data-file-name))
+
+(def default-output-path (str "resources/" data-name "-PROCESSED.csv"))
+
+(defn- schema-builder []
   (org.datavec.api.transform.schema.Schema$Builder.))
 
-(defn transform-process-builder [data-schema]
-  (org.datavec.api.transform.TransformProcess$Builder. ))
+(defn- transform-process-builder [built-schema]
+  (org.datavec.api.transform.TransformProcess$Builder. built-schema))
 
+(def labels
+  (apply
+   array-map
+   ["NU_INSCRICAO" nil
+    "NU_ANO" nil
+    "CO_MUNICIPIO_RESIDENCIA" nil
+    "NO_MUNICIPIO_RESIDENCIA" nil 
+    "CO_UF_RESIDENCIA" nil
+    "SG_UF_RESIDENCIA" nil
+    "NU_IDADE" :int
+    "TP_SEXO" ["M" "F"]
+    "TP_ESTADO_CIVIL" ["0" "1" "2" "3"]
+    "TP_COR_RACA"  ["0" "1" "2" "3" "4" "5" "6"]
+    "TP_NACIONALIDADE" nil
+    "CO_MUNICIPIO_NASCIMENTO" nil
+    "NO_MUNICIPIO_NASCIMENTO" nil
+    "CO_UF_NASCIMENTO" nil
+    "SG_UF_NASCIMENTO" nil
+    "TP_ST_CONCLUSAO" ["1" "2" "3" "4"]
+    "TP_ANO_CONCLUIU" nil
+    "TP_ESCOLA"  ["1" "2" "3" "4"]
+    "TP_ENSINO"  ["1" "2" "3"]
+    "IN_TREINEIRO" ["0" "1"]
+    "CO_ESCOLA" nil
+    "CO_MUNICIPIO_ESC" nil
+    "NO_MUNICIPIO_ESC" nil
+    "CO_UF_ESC" nil
+    "SG_UF_ESC" nil
+    "TP_DEPENDENCIA_ADM_ESC" nil
+    "TP_LOCALIZACAO_ESC" nil
+    "TP_SIT_FUNC_ESC" nil
+    "IN_BAIXA_VISAO" nil
+    "IN_CEGUEIRA" nil
+    "IN_SURDEZ" nil
+    "IN_DEFICIENCIA_AUDITIVA" nil
+    "IN_SURDO_CEGUEIRA" nil
+    "IN_DEFICIENCIA_FISICA" nil
+    "IN_DEFICIENCIA_MENTAL" nil
+    "IN_DEFICIT_ATENCAO" nil
+    "IN_DISLEXIA" nil
+    "IN_DISCALCULIA" nil
+    "IN_AUTISMO" nil
+    "IN_VISAO_MONOCULAR" nil
+    "IN_OUTRA_DEF" nil
+    "IN_SABATISTA" nil
+    "IN_GESTANTE" nil
+    "IN_LACTANTE" nil
+    "IN_IDOSO" nil
+    "IN_ESTUDA_CLASSE_HOSPITALAR" nil
+    "IN_SEM_RECURSO" nil
+    "IN_BRAILLE" nil
+    "IN_AMPLIADA_24" nil
+    "IN_AMPLIADA_18" nil
+    "IN_LEDOR" nil
+    "IN_ACESSO" nil
+    "IN_TRANSCRICAO" nil
+    "IN_LIBRAS" nil
+    "IN_LEITURA_LABIAL" nil
+    "IN_MESA_CADEIRA_RODAS" nil
+    "IN_MESA_CADEIRA_SEPARADA" nil
+    "IN_APOIO_PERNA" nil
+    "IN_GUIA_INTERPRETE" nil
+    "IN_MACA" nil
+    "IN_COMPUTADOR" nil
+    "IN_CADEIRA_ESPECIAL" nil
+    "IN_CADEIRA_CANHOTO" nil
+    "IN_CADEIRA_ACOLCHOADA" nil
+    "IN_PROVA_DEITADO" nil
+    "IN_MOBILIARIO_OBESO" nil
+    "IN_LAMINA_OVERLAY" nil
+    "IN_PROTETOR_AURICULAR" nil
+    "IN_MEDIDOR_GLICOSE" nil
+    "IN_MAQUINA_BRAILE" nil
+    "IN_SOROBAN" nil
+    "IN_MARCA_PASSO" nil
+    "IN_SONDA" nil
+    "IN_MEDICAMENTOS" nil
+    "IN_SALA_INDIVIDUAL" nil
+    "IN_SALA_ESPECIAL" nil
+    "IN_SALA_ACOMPANHANTE" nil
+    "IN_MOBILIARIO_ESPECIFICO" nil
+    "IN_MATERIAL_ESPECIFICO" nil
+    "IN_NOME_SOCIAL" nil
+    "IN_CERTIFICADO" nil
+    "NO_ENTIDADE_CERTIFICACAO" nil
+    "CO_UF_ENTIDADE_CERTIFICACAO" nil
+    "SG_UF_ENTIDADE_CERTIFICACAO" nil
+    "CO_MUNICIPIO_PROVA" nil
+    "NO_MUNICIPIO_PROVA" nil
+    "CO_UF_PROVA" nil
+    "SG_UF_PROVA" nil
+    "TP_PRESENCA_CN" nil
+    "TP_PRESENCA_CH" nil
+    "TP_PRESENCA_LC" nil
+    "TP_PRESENCA_MT" nil
+    "CO_PROVA_CN" nil
+    "CO_PROVA_CH" nil
+    "CO_PROVA_LC" nil
+    "CO_PROVA_MT" nil
+    "NU_NOTA_CN" :double
+    "NU_NOTA_CH" :double
+    "NU_NOTA_LC" :double
+    "NU_NOTA_MT" :double
+    "TX_RESPOSTAS_CN" nil
+    "TX_RESPOSTAS_CH" nil
+    "TX_RESPOSTAS_LC" nil
+    "TX_RESPOSTAS_MT" nil
+    "TP_LINGUA" nil
+    "TX_GABARITO_CN" nil
+    "TX_GABARITO_CH" nil
+    "TX_GABARITO_LC" nil
+    "TX_GABARITO_MT" nil
+    "TP_STATUS_REDACAO" nil
+    "NU_NOTA_COMP1" nil
+    "NU_NOTA_COMP2" nil
+    "NU_NOTA_COMP3" nil
+    "NU_NOTA_COMP4" nil
+    "NU_NOTA_COMP5" nil
+    "NU_NOTA_REDACAO" :double
+    "Q001" ["A" "B" "C" "D" "E" "F" "G" "H"]
+    "Q002" ["A" "B" "C" "D" "E" "F" "G" "H"]
+    "Q003" ["A" "B" "C" "D" "E" "F"]
+    "Q004" ["A" "B" "C" "D" "E" "F"]
+    "Q005" :int
+    "Q006" ["A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N" "O" "P" "Q"]
+    "Q007" ["A" "B" "C" "D"]
+    "Q008" ["A" "B" "C" "D" "E"]
+    "Q009" ["A" "B" "C" "D" "E"]
+    "Q010" ["A" "B" "C" "D" "E"]
+    "Q011" ["A" "B" "C" "D" "E"]
+    "Q012" ["A" "B" "C" "D" "E"]
+    "Q013" ["A" "B" "C" "D" "E"]
+    "Q014" ["A" "B" "C" "D" "E"]
+    "Q015" ["A" "B" "C" "D" "E"]
+    "Q016" ["A" "B" "C" "D" "E"]
+    "Q017" ["A" "B" "C" "D" "E"]
+    "Q018" ["A" "B" "C" "D" "E"]
+    "Q019" ["A" "B" "C" "D" "E"]
+    "Q020" ["A" "B"]
+    "Q021" ["A" "B"]
+    "Q022" ["A" "B" "C" "D" "E"]
+    "Q023" ["A" "B"]
+    "Q024" ["A" "B" "C" "D" "E"]
+    "Q025" ["A" "B"]
+    "Q026" ["A" "B" "C"]
+    "Q027" ["A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M"]
+    "Q028" ["A" "B" "C" "D" "E"]
+    "Q029" nil
+    "Q030" nil
+    "Q031" nil
+    "Q032" nil
+    "Q033" nil
+    "Q034" nil
+    "Q035" nil
+    "Q036" nil
+    "Q037" nil
+    "Q038" nil
+    "Q039" nil
+    "Q040" nil
+    "Q041" nil
+    "Q042" ["A" "B" "C" "D" "E" "F" "G" "H"]
+    "Q043" ["A" "B" "C" "D"]
+    "Q044" ["A" "B" "C"]
+    "Q045" ["A" "B" "C" "D"]
+    "Q046" ["A" "B" "C" "D"]
+    "Q047" ["A" "B" "C" "D" "E"]
+    "Q048" ["A" "B" "C" "D"]
+    "Q049" ["A" "B" "C"]
+    "Q050" ["A" "B" "C" "D"]]))
+
+(defn build-schema! [schema]
+  (let [sb (schema-builder)]
+    (doseq [[k v] schema]
+      (if v
+        (cond
+          (= v :int) (.addColumnInteger sb k)
+          (= v :double) (.addColumnDouble sb k)
+          (vector? v) (.addColumnCategorical sb k (java.util.ArrayList. (conj v ""))))
+        (.addColumnString sb k)))
+    (.build sb)))
+
+(defn build-transform-process! [schema built-schema]
+  (let [tpb (transform-process-builder built-schema)]
+    (doseq [[k v] schema]
+      (if-not v 
+        (.removeColumns tpb (into-array String [k]))
+        (when (vector? v)
+          (.categoricalToInteger tpb (into-array String [k])))))
+    (.build tpb)))
+
+(defn vectorize-enem-data!
+  ([output]
+   (let [built-schema (build-schema! labels)
+         tp (build-transform-process! labels built-schema)
+         spark-conf (SparkConf.)]
+     (doto spark-conf
+       (.setMaster "local[*]")
+       (.setAppName "Enem Data Analysis"))
+     (let [sc (JavaSparkContext. spark-conf)]
+       (try (let [lines (.filter
+                         (.textFile sc data-file-path)
+                         (reify org.apache.spark.api.java.function.Function
+                           (call [this x] 
+                             (let [r (-> x frequencies (get \,)
+                                         (= (dec (count labels))))]
+                               ;; (Thread/sleep 500)
+                               ;; (println x)
+                               ;; (println (-> x frequencies (get \,)))
+                               ;; (println "--------")
+                               ;; (println "--------") 
+                               r))))
+                  all-that-data
+                  (->> (CSVRecordReader.)
+                       StringToWritablesFunction. 
+                       (.map lines))
+                  processed-data (SparkTransformExecutor/execute all-that-data tp)
+                  to-save (->> (WritablesToStringFunction. ",") (.map processed-data))]
+              (.saveAsTextFile to-save output))
+            (catch Exception e
+              (println e)))
+       (.stop sc))))
+  ([] (vectorize-enem-data! default-output-path)))
 
 ;; Schema inputDataSchema = new Schema.Builder()
 ;; .addColumnsString("datetime","severity","location","county","state")
