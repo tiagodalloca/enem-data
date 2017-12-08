@@ -1,6 +1,4 @@
-(ns enem-data.data
-  (:require [clojure.data.csv :as csv]
-            [clojure.java.io :as io]))
+(ns enem-data.sketch.s15-1)
 
 (def data-file-name "MICRODADOS_ENEM_2015.csv")
 
