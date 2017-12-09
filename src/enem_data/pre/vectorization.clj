@@ -9,11 +9,11 @@
            [org.datavec.spark.transform SparkTransformExecutor]
            [org.datavec.spark.transform.misc StringToWritablesFunction]
            [org.datavec.spark.transform.misc WritablesToStringFunction]
-           [java.util List]))
+           [org.datavec.api.transform.transform.column ReorderColumnsTransform]))
 
 (def data-name "MICRODADOS_ENEM_2016")
 
-(def data-file-name (str data-name "-minus-first-line.csv"))
+(def data-file-name (str data-name ".csv"))
 
 (def data-file-path (str "resources/" data-file-name))
 
@@ -195,6 +195,9 @@
     "Q049" ["A" "B" "C"]
     "Q050" ["A" "B" "C" "D"]]))
 
+(def important-labels
+  ["NU_IDADE" "TP_SEXO" "TP_ESTADO_CIVIL" "TP_COR_RACA" "TP_ST_CONCLUSAO" "TP_ESCOLA" "TP_ENSINO" "IN_TREINEIRO" "Q001" "Q002" "Q003" "Q004" "Q005" "Q006" "Q007" "Q008" "Q009" "Q010" "Q011" "Q012" "Q013" "Q014" "Q015" "Q016" "Q017" "Q018" "Q019" "Q020" "Q021" "Q022" "Q023" "Q024" "Q025" "Q026" "Q027" "Q028" "Q042" "Q043" "Q044" "Q045" "Q046" "Q047" "Q048" "Q049" "Q050" "NU_NOTA_CN" "NU_NOTA_CH" "NU_NOTA_LC" "NU_NOTA_MT" "NU_NOTA_REDACAO"])
+
 (defn build-schema! [schema]
   (let [sb (schema-builder)]
     (doseq [[k v] schema]
@@ -213,12 +216,13 @@
         (.removeColumns tpb (into-array String [k]))
         (when (vector? v)
           (.categoricalToInteger tpb (into-array String [k])))))
+    (.reorderColumns tpb (into-array String important-labels))
     (.build tpb)))
 
 (defn vectorize-enem-data!
   ([output]
-   (let [built-schema (build-schema! labels)
-         tp (build-transform-process! labels built-schema)
+   (let [schema (build-schema! labels)
+         tp (build-transform-process! labels schema)
          spark-conf (SparkConf.)]
      (doto spark-conf
        (.setMaster "local[*]")
@@ -230,11 +234,6 @@
                            (call [this x] 
                              (let [r (-> x frequencies (get \,)
                                          (= (dec (count labels))))]
-                               ;; (Thread/sleep 500)
-                               ;; (println x)
-                               ;; (println (-> x frequencies (get \,)))
-                               ;; (println "--------")
-                               ;; (println "--------") 
                                r))))
                   all-that-data
                   (->> (CSVRecordReader.)
@@ -242,7 +241,7 @@
                        (.map lines))
                   processed-data (SparkTransformExecutor/execute all-that-data tp)
                   to-save (->> (WritablesToStringFunction. ",") (.map processed-data))]
-              (.saveAsTextFile to-save output))
+              (.saveAsTextFile (.coalesce to-save 1 true) output))
             (catch Exception e
               (println e)))
        (.stop sc))))

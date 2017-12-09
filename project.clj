@@ -5,6 +5,7 @@
 
                  [hswick/jutsu.ai "0.1.0"]
                  [org.nd4j/nd4j-native-platform "0.8.0"]
+                 [org.deeplearning4j/dl4j-spark_2.11 "0.9.1_spark_2"]
 
                  [org.datavec/datavec-api "0.9.1"]
                  [org.datavec/datavec-spark_2.11 "0.9.1_spark_2"]]
