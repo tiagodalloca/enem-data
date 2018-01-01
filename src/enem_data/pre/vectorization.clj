@@ -228,20 +228,31 @@
        (.setMaster "local[*]")
        (.setAppName "Enem Data Analysis"))
      (let [sc (JavaSparkContext. spark-conf)]
-       (try (let [lines (.filter
+       (try (let [labels-n (reduce-kv (fn [acc _ vl] (if vl (inc acc) acc))
+                                      0 labels)
+                  lines (.filter
                          (.textFile sc data-file-path)
                          (reify org.apache.spark.api.java.function.Function
                            (call [this x] 
-                             (let [r (-> x frequencies (get \,)
-                                         (= (dec (count labels))))]
-                               r))))
+                             (let [v (clojure.string/split x #",")] 
+                               (= (count v) (count labels))))))
                   all-that-data
                   (->> (CSVRecordReader.)
                        StringToWritablesFunction. 
                        (.map lines))
                   processed-data (SparkTransformExecutor/execute all-that-data tp)
-                  to-save (->> (WritablesToStringFunction. ",") (.map processed-data))]
-              (.saveAsTextFile (.coalesce to-save 1 true) output))
+                  to-save
+                  (-> processed-data
+                      (.map (WritablesToStringFunction. ","))
+                      (.filter (reify org.apache.spark.api.java.function.Function
+                                 (call [this x] 
+                                   (let [v (clojure.string/split x #",")]
+                                     ;; (= 50 (count v))
+                                     ;; the following was not tested and
+                                     ;; is subject to errors
+                                     (= labels-n (count v)))))))]
+              ;; (.saveAsTextFile (.coalesce to-save 1 true) output)
+              (.saveAsTextFile to-save output))
             (catch Exception e
               (println e)))
        (.stop sc))))
