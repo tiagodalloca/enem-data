@@ -246,11 +246,8 @@
                       (.map (WritablesToStringFunction. ","))
                       (.filter (reify org.apache.spark.api.java.function.Function
                                  (call [this x] 
-                                   (let [v (clojure.string/split x #",")]
-                                     ;; (= 50 (count v))
-                                     ;; the following was not tested and
-                                     ;; is subject to errors
-                                     (= labels-n (count v)))))))]
+                                   (let [v (first (clojure.data.csv/read-csv x))]
+                                     (every? #(-> % empty? not) v))))))]
               ;; (.saveAsTextFile (.coalesce to-save 1 true) output)
               (.saveAsTextFile to-save output))
             (catch Exception e
