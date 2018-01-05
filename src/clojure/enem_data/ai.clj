@@ -53,9 +53,11 @@
                        (NumberedFileInputSplit.
                         (str "resources/" all-path "part-%05d")
                         151 169))
-        train-iterator (RecordReaderDataSetIterator. train-reader 1000 45 49 true)
-        test-iterator (RecordReaderDataSetIterator. test-reader 1000 45 49 true)
-        epochs 10
+        train-iterator (RecordReaderDataSetIterator.
+                        train-reader 1000 45 49 true)
+        test-iterator (RecordReaderDataSetIterator.
+                       test-reader 1000 45 49 true)
+        epochs 30
         ready-for-more true]
     (println "Initializing net...")
     (.init net)
@@ -69,19 +71,10 @@
       (.fit net train-iterator))
     (println "Trained net")
 
-    (ModelSerializer/writeModel net (java.io.File. "enem-net") ready-for-more)
+    (ModelSerializer/writeModel
+     net (java.io.File. "enem-net-2") ready-for-more)
     (println "Saved net")
-
-    (let [eval (.evaluateRegression net test-iterator)
-          ;; eval (RegressionEvaluation. (doto (java.util.List.)
-          ;;                               (.add "NU_NOTA_CN")
-          ;;                               (.add "NU_NOTA_CH")
-          ;;                               (.add "NU_NOTA_LC")
-          ;;                               (.add "NU_NOTA_MT")
-          ;;                               (.add "NU_NOTA_REDACAO")))
-          ]
-      (println "Evaluated net")
-      (println (.stats eval)))))
+    (test-net net test-iterator)))
 
 (defn test-net
   ([net test-iterator]
