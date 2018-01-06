@@ -14,6 +14,11 @@
            [org.deeplearning4j.eval Evaluation RegressionEvaluation]
            [org.deeplearning4j.datasets.datavec RecordReaderDataSetIterator]
 
+           org.deeplearning4j.api.storage.StatsStorage
+           org.deeplearning4j.ui.api.UIServer
+           org.deeplearning4j.ui.stats.StatsListener
+           org.deeplearning4j.ui.storage.InMemoryStatsStorage
+
            [enemdata NeuralNet]))
 
 (def all-path "MICRODADOS_ENEM_2016-PROCESSED.csv/")
@@ -36,9 +41,15 @@
 
 (comment (def net (ai/network net-config)))
 
-(let [learning-rate 0.1]
-  (set! NeuralNet/learning_rate 0.1)
-  (def net (MultiLayerNetwork. (NeuralNet/getNetConfiguration))))
+(set! NeuralNet/learning_rate 1E-6)
+(def net (MultiLayerNetwork. (NeuralNet/getNetConfiguration)))
+
+(defn set-ui [net]
+  (let [ui-server (UIServer/getInstance)
+        stats-storage (InMemoryStatsStorage.)] 
+    (.setListeners net (into-array `(~(StatsListener. stats-storage))))
+    (.attach ui-server stats-storage)
+    net))
 
 (defn test-net
   ([net test-iterator]
@@ -73,14 +84,17 @@
                         train-reader 1000 45 49 true)
         test-iterator (RecordReaderDataSetIterator.
                        test-reader 1000 45 49 true)
-        epochs 20
+        epochs 15
         ready-for-more true]
     (println "Initializing net...")
     (.init net)
     (println "Initialized net")
-    ;; (.setListeners net (ScoreIterationListener. 15000))
-    
+
+    (set-ui net)
+    (println "UI set")
+
     ;; (ai/train-net! net 1 train-iterator)
+
     (doseq [n (range 0 epochs)]
       (.reset train-iterator)
       (println "train-iterator reset")
@@ -88,7 +102,7 @@
     (println "Trained net")
 
     (ModelSerializer/writeModel
-     net (java.io.File. "resources/nets/enem-net-4") ready-for-more)
+     net (java.io.File. "resources/nets/enem-net-5") ready-for-more)
     (println "Saved net")
     (test-net net test-iterator)))
 
