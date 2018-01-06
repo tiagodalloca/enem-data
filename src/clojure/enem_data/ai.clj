@@ -18,10 +18,6 @@
 
 (def all-path "MICRODADOS_ENEM_2016-PROCESSED.csv/")
 
-(def training-path "MICRODADOS_ENEM_2016-TRAINING/")
-
-(def test-path "MICRODADOS_ENEM_2016-TESTING/")
-
 (def net-config
   [:seed 123
    :iterations 6000
@@ -38,9 +34,29 @@
    :pretrain false
    :backprop true])
 
-;; (def net (ai/network net-config))
+(comment (def net (ai/network net-config)))
 
-(def net (MultiLayerNetwork. (NeuralNet/getNetConfiguration)))
+(let [learning-rate 0.1]
+  (set! NeuralNet/learning_rate 0.1)
+  (def net (MultiLayerNetwork. (NeuralNet/getNetConfiguration))))
+
+(defn test-net
+  ([net test-iterator]
+   (let [eval (.evaluateRegression net test-iterator)]
+     (println "Evaluated net")
+     (println (.stats eval))))
+  ([file-name]
+   (let [net (ModelSerializer/restoreMultiLayerNetwork
+              (java.io.File. file-name))
+         test-reader (CSVRecordReader.)
+         _ (.initialize test-reader
+                        (NumberedFileInputSplit.
+                         (str "resources/" all-path "part-%05d")
+                         151 169)) 
+         test-iterator (RecordReaderDataSetIterator.
+                        test-reader 1000 45 49 true)]
+     (.init net)
+     (test-net net test-iterator))))
 
 (defn do-yer-thing []
   (let [train-reader (CSVRecordReader. 0 \,)
@@ -57,7 +73,7 @@
                         train-reader 1000 45 49 true)
         test-iterator (RecordReaderDataSetIterator.
                        test-reader 1000 45 49 true)
-        epochs 30
+        epochs 20
         ready-for-more true]
     (println "Initializing net...")
     (.init net)
@@ -72,24 +88,7 @@
     (println "Trained net")
 
     (ModelSerializer/writeModel
-     net (java.io.File. "enem-net-2") ready-for-more)
+     net (java.io.File. "resources/nets/enem-net-4") ready-for-more)
     (println "Saved net")
     (test-net net test-iterator)))
 
-(defn test-net
-  ([net test-iterator]
-   (let [eval (.evaluateRegression net test-iterator)]
-     (println "Evaluated net")
-     (println (.stats eval))))
-  ([]
-   (let [net (ModelSerializer/restoreMultiLayerNetwork
-              (java.io.File. "enem-net"))
-         test-reader (CSVRecordReader.)
-         _ (.initialize test-reader
-                        (NumberedFileInputSplit.
-                         (str "resources/" all-path "part-%05d")
-                         151 169)) 
-         test-iterator (RecordReaderDataSetIterator.
-                        test-reader 1000 45 49 true)]
-     (.init net)
-     (test-net net test-iterator))))

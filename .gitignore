@@ -1,4 +1,5 @@
 resources/*
+!resources/nets/
 /target
 /classes
 /checkouts

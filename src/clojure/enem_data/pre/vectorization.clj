@@ -1,4 +1,5 @@
 (ns enem-data.pre.vectorization
+  (:require [clojure.data.csv :as csv])
   (:import [org.apache.spark SparkConf]
            [org.apache.spark.api.java JavaRDD]
            [org.apache.spark.api.java JavaSparkContext]
@@ -246,7 +247,7 @@
                       (.map (WritablesToStringFunction. ","))
                       (.filter (reify org.apache.spark.api.java.function.Function
                                  (call [this x] 
-                                   (let [v (first (clojure.data.csv/read-csv x))]
+                                   (let [v (first (csv/read-csv x))]
                                      (every? #(-> % empty? not) v))))))]
               ;; (.saveAsTextFile (.coalesce to-save 1 true) output)
               (.saveAsTextFile to-save output))
@@ -254,44 +255,3 @@
               (println e)))
        (.stop sc))))
   ([] (vectorize-enem-data! default-output-path)))
-
-;; Schema inputDataSchema = new Schema.Builder()
-;; .addColumnsString("datetime","severity","location","county","state")
-;; .addColumnsDouble("lat","lon")
-;; .addColumnsString("comment")
-;; .addColumnCategorical("type","TOR","WIND","HAIL")
-;; .build();
-
-
-;; /**
-;; * Define a transform process to extract lat and lon
-;; * and also transform type from one of three strings
-;; * to either 0,1,2
-;; */
-
-
-;; TransformProcess tp = new TransformProcess.Builder(inputDataSchema)
-;; .removeColumns("datetime","severity","location","county","state","comment")
-;; .categoricalToInteger("type")
-;; .build();
-
-;; SparkConf sparkConf = new SparkConf();
-;; sparkConf.setMaster("local[*]");
-;; sparkConf.setAppName("Storm Reports Record Reader Transform");
-;; JavaSparkContext sc = new JavaSparkContext(sparkConf);
-;; /**
-;; * Get our data into a spark RDD
-;; * and transform that spark RDD using our
-;; * transform process
-;; */
-
-;; // read the data file
-;; JavaRDD<String> lines = sc.textFile(inputPath);
-;; // convert to Writable
-;; JavaRDD<List<Writable>> stormReports = lines.map(new StringToWritablesFunction(new CSVRecordReader()));
-;; // run our transform process
-;; JavaRDD<List<Writable>> processed = SparkTransformExecutor.execute(stormReports,tp);
-;; // convert Writable back to string for export
-;; JavaRDD<String> toSave= processed.map(new WritablesToStringFunction(","));
-
-;; toSave.saveAsTextFile(outputPath);
