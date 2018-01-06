@@ -21,7 +21,7 @@ public class NeuralNet {
 
 	public static double momentum = 0.7;
 
-	public static double learning_rate = 0.00001;
+	public static double learning_rate = 0.000001;
 
 	public static MultiLayerConfiguration getNetConfiguration () {
 		return new NeuralNetConfiguration.Builder()
@@ -32,13 +32,13 @@ public class NeuralNet {
 			.list()
 			.layer(0, new DenseLayer.Builder().nIn(45).nOut(80)
 						 .activation(Activation.RELU).build())
-			.layer(1, new DenseLayer.Builder().nIn(80).nOut(120)
+			.layer(1, new DenseLayer.Builder().nIn(80).nOut(160)
 						 .activation(Activation.RELU).build())
-			.layer(2, new DenseLayer.Builder().nIn(120).nOut(60)
-						 .activation(Activation.TANH).build())
+			.layer(2, new DenseLayer.Builder().nIn(160).nOut(320)
+						 .activation(Activation.RELU).build())
 			.layer(3, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
 						 .activation(Activation.IDENTITY)
-						 .nIn(60).nOut(5).build())
+						 .nIn(320).nOut(5).build())
 			.pretrain(false).backprop(true).build();
 	}
 }

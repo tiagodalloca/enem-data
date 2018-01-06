@@ -102,7 +102,7 @@
     (println "Trained net")
 
     (ModelSerializer/writeModel
-     net (java.io.File. "resources/nets/enem-net-5") ready-for-more)
+     net (java.io.File. "resources/nets/enem-net-6") ready-for-more)
     (println "Saved net")
     (test-net net test-iterator)))
 
