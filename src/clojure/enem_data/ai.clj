@@ -84,7 +84,7 @@
                         train-reader 1000 45 49 true)
         test-iterator (RecordReaderDataSetIterator.
                        test-reader 1000 45 49 true)
-        epochs 15
+        epochs 8
         ready-for-more true]
     (println "Initializing net...")
     (.init net)
@@ -102,7 +102,7 @@
     (println "Trained net")
 
     (ModelSerializer/writeModel
-     net (java.io.File. "resources/nets/enem-net-6") ready-for-more)
+     net (java.io.File. "resources/nets/enem-net-7") ready-for-more)
     (println "Saved net")
     (test-net net test-iterator)))
 

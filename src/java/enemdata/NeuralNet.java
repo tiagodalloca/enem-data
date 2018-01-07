@@ -21,7 +21,7 @@ public class NeuralNet {
 
 	public static double momentum = 0.7;
 
-	public static double learning_rate = 0.000001;
+	public static double learning_rate = 0.0000001;
 
 	public static MultiLayerConfiguration getNetConfiguration () {
 		return new NeuralNetConfiguration.Builder()
@@ -29,16 +29,19 @@ public class NeuralNet {
 			.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
 			.updater(new Nesterovs(learning_rate, momentum))
 			.weightInit(WeightInit.XAVIER)
+			.l2(0.001)
 			.list()
-			.layer(0, new DenseLayer.Builder().nIn(45).nOut(80)
+			.layer(0, new DenseLayer.Builder().nIn(45).nOut(500)
 						 .activation(Activation.RELU).build())
-			.layer(1, new DenseLayer.Builder().nIn(80).nOut(160)
+			// .layer(1, new DenseLayer.Builder().nIn(100).nOut(200)
+			// 			 .activation(Activation.RELU).build())
+			// .layer(2, new DenseLayer.Builder().nIn(200).nOut(400)
+			// 			 .activation(Activation.RELU).build())
+			.layer(1, new DenseLayer.Builder().nIn(500).nOut(1000)
 						 .activation(Activation.RELU).build())
-			.layer(2, new DenseLayer.Builder().nIn(160).nOut(320)
-						 .activation(Activation.RELU).build())
-			.layer(3, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
+			.layer(2, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
 						 .activation(Activation.IDENTITY)
-						 .nIn(320).nOut(5).build())
+						 .nIn(1000).nOut(5).build())
 			.pretrain(false).backprop(true).build();
 	}
 }
