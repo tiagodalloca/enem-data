@@ -29,19 +29,15 @@ public class NeuralNet {
 			.optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
 			.updater(new Nesterovs(learning_rate, momentum))
 			.weightInit(WeightInit.XAVIER)
-			.l2(0.001)
+			.l2(0.01)
 			.list()
-			.layer(0, new DenseLayer.Builder().nIn(45).nOut(500)
+			.layer(0, new DenseLayer.Builder().nIn(45).nOut(100)
 						 .activation(Activation.RELU).build())
-			// .layer(1, new DenseLayer.Builder().nIn(100).nOut(200)
-			// 			 .activation(Activation.RELU).build())
-			// .layer(2, new DenseLayer.Builder().nIn(200).nOut(400)
-			// 			 .activation(Activation.RELU).build())
-			.layer(1, new DenseLayer.Builder().nIn(500).nOut(1000)
+			.layer(1, new DenseLayer.Builder().nIn(100).nOut(400)
 						 .activation(Activation.RELU).build())
 			.layer(2, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
 						 .activation(Activation.IDENTITY)
-						 .nIn(1000).nOut(5).build())
+						 .nIn(400).nOut(5).build())
 			.pretrain(false).backprop(true).build();
 	}
 }

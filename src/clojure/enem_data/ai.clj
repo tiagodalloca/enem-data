@@ -41,6 +41,7 @@
 
 (comment (def net (ai/network net-config)))
 
+(set! NeuralNet/momentum 0.5)
 (set! NeuralNet/learning_rate 1E-6)
 (def net (MultiLayerNetwork. (NeuralNet/getNetConfiguration)))
 
@@ -84,7 +85,7 @@
                         train-reader 1000 45 49 true)
         test-iterator (RecordReaderDataSetIterator.
                        test-reader 1000 45 49 true)
-        epochs 8
+        epochs 10
         ready-for-more true]
     (println "Initializing net...")
     (.init net)
@@ -102,7 +103,7 @@
     (println "Trained net")
 
     (ModelSerializer/writeModel
-     net (java.io.File. "resources/nets/enem-net-7") ready-for-more)
+     net (java.io.File. "resources/nets/enem-net-8") ready-for-more)
     (println "Saved net")
     (test-net net test-iterator)))
 
